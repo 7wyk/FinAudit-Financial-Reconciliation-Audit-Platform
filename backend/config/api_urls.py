@@ -13,4 +13,8 @@ urlpatterns = [
         "organizations/<uuid:org_id>/imports/",
         include("apps.ingestion.urls", namespace="ingestion"),
     ),
+    path(
+        "organizations/<uuid:org_id>/reconciliation/",
+        include("apps.reconciliation.urls", namespace="reconciliation"),
+    ),
 ]
