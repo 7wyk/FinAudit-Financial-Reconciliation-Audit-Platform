@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: finaudit_test
+          POSTGRES_USER: finaudit
+          POSTGRES_PASSWORD: finaudit
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U finaudit"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        working-directory: backend
+        env:
+          SECRET_KEY: ci-test-secret-key
+          DEBUG: "True"
+          ENVIRONMENT: test
+          DB_NAME: finaudit_test
+          DB_USER: finaudit
+          DB_PASSWORD: finaudit
+          DB_HOST: localhost
+          DB_PORT: "5432"
+          CELERY_BROKER_URL: "memory://"
+          CELERY_RESULT_BACKEND: "cache+memory://"
+        run: pytest --tb=short -v
+
+  frontend-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Type check
+        working-directory: frontend
+        run: npx tsc --noEmit
+
+      - name: Build
+        working-directory: frontend
+        run: npm run build

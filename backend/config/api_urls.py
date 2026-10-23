@@ -1,0 +1,16 @@
+"""
+API v1 URL Configuration.
+
+Each Django app registers its own routes here.
+"""
+
+from django.urls import include, path
+
+urlpatterns = [
+    path("auth/", include("apps.accounts.urls", namespace="accounts")),
+    path("organizations/", include("apps.organizations.urls", namespace="organizations")),
+    path(
+        "organizations/<uuid:org_id>/imports/",
+        include("apps.ingestion.urls", namespace="ingestion"),
+    ),
+]
