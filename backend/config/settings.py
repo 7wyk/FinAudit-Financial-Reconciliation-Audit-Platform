@@ -81,13 +81,14 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": config("DB_NAME", default="finaudit"),
-        "USER": config("DB_USER", default="finaudit"),
-        "PASSWORD": config("DB_PASSWORD", default="finaudit"),
-        "HOST": config("DB_HOST", default="localhost"),
+        "NAME": config("DB_NAME"),
+        "USER": config("DB_USER"),
+        "PASSWORD": config("DB_PASSWORD"),
+        "HOST": config("DB_HOST"),
         "PORT": config("DB_PORT", default="5432"),
         "OPTIONS": {
             "connect_timeout": 5,
+            "sslmode": config("DB_SSLMODE", default="require"),
         },
     }
 }

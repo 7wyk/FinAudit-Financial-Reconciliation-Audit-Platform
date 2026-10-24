@@ -1,22 +1,6 @@
 version: "3.9"
 
 services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: finaudit
-      POSTGRES_USER: finaudit
-      POSTGRES_PASSWORD: finaudit
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U finaudit"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   redis:
     image: redis:7-alpine
     ports:
@@ -37,9 +21,11 @@ services:
       - "8000:8000"
     env_file:
       - ./backend/.env
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
     depends_on:
-      db:
-        condition: service_healthy
       redis:
         condition: service_healthy
 
@@ -51,11 +37,10 @@ services:
       - ./backend:/app
     env_file:
       - ./backend/.env
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
     depends_on:
-      db:
-        condition: service_healthy
       redis:
         condition: service_healthy
-
-volumes:
-  pgdata:
